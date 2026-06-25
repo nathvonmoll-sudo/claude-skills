@@ -17,6 +17,8 @@ description: >
 Pulls calendar events and scans recent emails to produce an actionable brief,
 then offers to add any email-derived events that are missing from the calendar.
 
+If the user has Microsoft 365 connected instead of Google, use the outlook_email_search and outlook_calendar_search tools from that connector in place of the Gmail and Google Calendar tools above. The logic is identical.
+
 ---
 
 ## Step 1: Determine the time window
@@ -170,7 +172,3 @@ Confirm each one after creation: "Added: **[title]** on [date] at [time]."
 If either is not connected, tell the user which one is missing and what it's
 needed for, then proceed with whatever is available.
 
-If the user has Microsoft 365 connected instead of Google, use the
-`outlook_email_search` and `outlook_calendar_search` tools from that
-connector in place of the Gmail and Google Calendar tools above. The logic
-is identical.
