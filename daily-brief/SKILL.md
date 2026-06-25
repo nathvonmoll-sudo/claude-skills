@@ -1,23 +1,22 @@
 ---
 name: daily-brief
 description: >
-  Check the user's calendar and recent emails to produce a clear, actionable
-  brief of what's planned and what needs attention — for today, the next few
-  days, next week, or any specific day. Also scans emails for meetings,
-  deadlines, or commitments that aren't yet on the calendar and offers to add
-  them. ALWAYS use this skill when the user asks: "what's on today", "plan my
-  day", "what's coming up", "brief me for the week", "what do I have on
-  [day]", "what do I need to do today", "anything I'm missing", "check my
-  schedule", "what's planned", or any similar request for a daily or weekly
-  overview. Requires Google Calendar and Gmail to be connected.
+  Check the user's calendar, recent emails, and WhatsApp messages to produce a
+  clear, actionable brief of what's planned and what needs attention — for
+  today, the next few days, next week, or any specific day. Also scans emails
+  and WhatsApp for meetings, deadlines, or commitments that aren't yet on the
+  calendar and offers to add them. ALWAYS use this skill when the user asks:
+  "what's on today", "plan my day", "what's coming up", "brief me for the
+  week", "what do I have on [day]", "what do I need to do today", "anything I'm
+  missing", "check my schedule", "what's planned", or any similar request for a
+  daily or weekly overview. Requires Google Calendar and Gmail to be connected.
+  WhatsApp is optional but used if connected.
 ---
 
 # Daily Brief Skill
 
-Pulls calendar events and scans recent emails to produce an actionable brief,
-then offers to add any email-derived events that are missing from the calendar.
-
-If the user has Microsoft 365 connected instead of Google, use the outlook_email_search and outlook_calendar_search tools from that connector in place of the Gmail and Google Calendar tools above. The logic is identical.
+Pulls calendar events and scans recent emails and WhatsApp messages to produce
+an actionable brief, then offers to add any missing events to the calendar.
 
 ---
 
@@ -100,7 +99,42 @@ a missing event.
 
 ---
 
-## Step 5: Build the brief
+## Step 5: Scan WhatsApp for missing events (if connected)
+
+If the WhatsApp MCP is available, use `whatsapp: list_messages` to scan recent
+messages for scheduling signals. Use these parameters:
+
+```
+after: [5 days ago]
+limit: 100
+sort_by: newest
+```
+
+Look for the same signals as in Step 4:
+
+**Meeting/event signals:**
+- A specific date and time agreed on in conversation
+- "Let's meet...", "Can we do...", "I'll come by...", "See you at..."
+- Confirmations: "Sounds good", "See you then", "confirmed"
+
+**Deadline/commitment signals:**
+- "Can you send me...", "I need it by...", "Don't forget..."
+- Tasks or deliverables the user has agreed to
+
+**WhatsApp-specific patterns to watch for:**
+- Voice note references ("as per my voice note...")
+- Casual confirmations that wouldn't show up in email ("ya cool", "lekker")
+- Group chat plans (events, meetups, social commitments)
+
+For each signal found, check against the calendar the same way as Step 4.
+Flag anything not already on the calendar as a missing event, and note
+which WhatsApp chat it came from (contact name or group name).
+
+If WhatsApp is not connected, skip this step silently.
+
+---
+
+## Step 6: Build the brief
 
 Output the brief in clean, scannable prose. Do not use excessive headers or
 turn it into a wall of bullets. Structure:
@@ -122,23 +156,30 @@ already on the calendar. For each one:
 - Which email it came from (sender + subject line)
 - Whether it looks like a confirmed commitment or just a suggested time
 
-End with a short "anything else" note if there are unread emails that look
-time-sensitive but don't fit neatly into the above.
+**From your WhatsApp — things not yet on the calendar:**
+List any WhatsApp-derived events or commitments found in Step 5. For each one:
+- What it is and when
+- Which chat it came from
+- Whether it looks confirmed or tentative
+
+End with a short "anything else" note if there are unread emails or WhatsApp
+messages that look time-sensitive but don't fit neatly into the above.
 
 ---
 
-## Step 6: Offer to add missing events to the calendar/same with teams messages if connected
+## Step 7: Offer to add missing events to the calendar
 
-After presenting the brief, if any missing events were found in Step 4, ask:
+After presenting the brief, if any missing events were found in Steps 4 or 5,
+ask:
 
-> "I spotted [N] thing(s) from your emails that aren't on your calendar yet.
-> Want me to add them?"
+> "I spotted [N] thing(s) from your emails/WhatsApp that aren't on your
+> calendar yet. Want me to add them?"
 
 If the user says yes (for all or specific ones):
 
 For each event to add, confirm the details before creating:
-- Title (inferred from email context)
-- Date and time (extracted from email — if ambiguous, ask)
+- Title (inferred from context)
+- Date and time (extracted from message — if ambiguous, ask)
 - Duration (default 30 min for calls, 60 min for meetings, unless specified)
 - Which calendar to add it to (default: primary)
 
@@ -154,9 +195,8 @@ Confirm each one after creation: "Added: **[title]** on [date] at [time]."
   in 30 seconds
 - Don't pad with filler ("Here's what I found for you!")
 - If the calendar is empty for the window, say so directly and move straight
-  to the email scan
-- If there's nothing in emails either, say that clearly rather than
-  inventing structure
+  to the email/WhatsApp scan
+- If there's nothing anywhere, say that clearly rather than inventing structure
 - For multi-day briefs, one short paragraph per day is usually enough unless
   a day is packed
 - Flag anything that looks like a conflict (two events at the same time)
@@ -168,7 +208,15 @@ Confirm each one after creation: "Added: **[title]** on [date] at [time]."
 
 - **Google Calendar** — for reading events and creating new ones
 - **Gmail** — for scanning emails
+- **WhatsApp MCP** — optional, for scanning WhatsApp messages
 
-If either is not connected, tell the user which one is missing and what it's
-needed for, then proceed with whatever is available.
+If Google Calendar or Gmail is not connected, tell the user which one is
+missing and what it's needed for, then proceed with whatever is available.
 
+If WhatsApp is not connected, skip Step 5 silently — don't mention it unless
+the user asks.
+
+If the user has Microsoft 365 connected instead of Google, use the
+`outlook_email_search` and `outlook_calendar_search` tools from that
+connector in place of the Gmail and Google Calendar tools above. The logic
+is identical.
