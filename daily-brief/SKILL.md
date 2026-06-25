@@ -127,7 +127,7 @@ time-sensitive but don't fit neatly into the above.
 
 ---
 
-## Step 6: Offer to add missing events to the calendar
+## Step 6: Offer to add missing events to the calendar/same with teams messages if connected
 
 After presenting the brief, if any missing events were found in Step 4, ask:
 
