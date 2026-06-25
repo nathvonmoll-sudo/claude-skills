@@ -23,9 +23,9 @@ This skill has two modes. Read the user's intent and jump to the right one.
 
 **When to run this mode:** The user says something like "capture my writing style", "set up my style", "update my style from my emails", or they haven't run setup before and want to write in their style.
 
-### Step 1: Read sent emails via Gmail
+### Step 1: Read sent emails via Email connecter (Gmail or Microsoft 365 connector for Outlook)
 
-Use the Gmail `search_threads` tool to retrieve the 30 most recent sent emails:
+Use the Gmail/Outlook `search_threads` tool to retrieve the 30 most recent sent emails:
 ```
 query: "in:sent"
 pageSize: 30
